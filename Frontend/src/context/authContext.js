@@ -8,20 +8,23 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUser = async () => {
+    const loadUser = async (retries = 3, delay = 1000) => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          // This endpoint should be created in your backend to verify a token
-          // and return user data.
-          const { data } = await apiClient.get('/auth/me'); 
+          const { data } = await apiClient.get('/users/me'); 
           setUser(data);
         } catch (error) {
-          console.error("Failed to load user", error);
+          console.error("Failed to load user:", error.message);
+          if (error.code === 'ECONNREFUSED' && retries > 0) {
+            console.log(`Backend not ready, retrying in ${delay / 1000}s... (${retries} retries left)`);
+            setTimeout(() => loadUser(retries - 1, delay), delay);
+            return; // Exit this attempt
+          }
           localStorage.removeItem('token');
+          setUser(null);
         }
       } else {
-        // Do NOT set a default test user. Only set user if token exists.
         setUser(null);
       }
       setLoading(false);

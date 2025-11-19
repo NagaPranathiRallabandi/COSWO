@@ -2,50 +2,49 @@ const express = require('express');
 const router = express.Router();
 const Donation = require('../models/Donation');
 const User = require('../models/User');
-// You'll need an auth middleware to get the logged-in user
-// const auth = require('../middleware/auth'); 
+const auth = require('../middleware/auth'); // Assuming auth middleware sets req.user
 
-// For now, let's assume 'req.user.email' is available
-// from a JWT authentication middleware.
-
-// POST /api/donations - Create a new donation
-// This replaces your 'createDonation' workflow
-router.post('/', async (req, res) => {
-    console.log('[POST /api/donations] incoming body:', req.body);
+// @route   POST /api/donations
+// @desc    Create a new donation for approval
+// @access  Private (Donor)
+router.post('/', auth, async (req, res) => {
     try {
-        const userEmail = "testuser@example.com"; // In reality: req.user.email;
-        const user = await User.findOne({ email: userEmail });
+        // The user's ID is retrieved from the authentication token
+        const user = await User.findById(req.user.id);
 
-        if (!user) {
-            return res.status(400).json({ msg: 'User profile not found.' });
+        if (!user || user.role !== 'Donor') {
+            return res.status(403).json({ msg: 'User is not a donor or not found.' });
         }
 
+        // Create the new donation with a 'pending_approval' status
         const newDonation = new Donation({
             ...req.body,
-            donor_email: userEmail,
-            donor_id: user._id, // Use the user's main ID
+            donor: user._id, // Link to the User document
+            status: 'pending_approval' // Default status for new donations
         });
 
         const savedDonation = await newDonation.save();
-        console.log('[POST /api/donations] saved donation id:', savedDonation._id);
 
-        // Update user stats
-        await User.findByIdAndUpdate(user._id, {
-            $inc: { total_donations: 1, total_amount_donated: savedDonation.amount || 0 }
+        // Note: We do NOT update donor stats (total_donations, etc.) here.
+        // That will happen upon admin approval.
+
+        res.status(201).json({ 
+            message: 'Donation submitted for approval.',
+            donation: savedDonation 
         });
 
-        res.status(201).json(savedDonation);
     } catch (err) {
-        console.error('[POST /api/donations] error:', err);
-        res.status(500).json({ error: err.message });
+        console.error('Error creating donation:', err.message);
+        res.status(500).json({ error: 'Server error while creating donation.' });
     }
 });
 
-
-// GET /api/donations - List all donations
-router.get('/', async (req, res) => {
+// @route   GET /api/donations
+// @desc    Get all donations for the logged-in donor
+// @access  Private (Donor)
+router.get('/', auth, async (req, res) => {
     try {
-        const donations = await Donation.find();
+        const donations = await Donation.find({ donor: req.user.id }).sort({ createdAt: -1 });
         res.json(donations);
     } catch (err) {
         res.status(500).json({ error: err.message });

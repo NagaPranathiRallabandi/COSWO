@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { Link, useLocation, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils/utils";
-import { Heart, Gift, Users, Upload, LayoutDashboard } from "lucide-react";
+import { Heart, Gift, Users, Upload, LayoutDashboard, ListChecks } from "lucide-react";
 import { Sidebar } from "./Components/ui/sidebar";
 import HomePage from "./Pages/home";
 import AdminDashboard from "./Pages/AdminDashboard";
@@ -16,6 +16,7 @@ import DonationDetails from "./Pages/DonationDetails";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
 import { AuthContext } from "./context/authContext";
+import DonationRequests from "./Pages/DonationRequests"; // Import the new page
 
 import { Button } from "./Components/ui/button";
 
@@ -33,6 +34,7 @@ const batchStaffNavigationItems = [
 
 const adminNavigationItems = [
   { title: "Admin Dashboard", url: createPageUrl("admin-dashboard"), icon: LayoutDashboard, component: AdminDashboard },
+  { title: "Donation Requests", url: createPageUrl("donation-requests"), icon: ListChecks, component: DonationRequests },
   { title: "Donors List", url: createPageUrl("donorslist"), icon: Users, component: DonorsList },
   { title: "Batch Staff List", url: createPageUrl("batchstafflist"), icon: Users, component: BatchStaffList },
 ];
@@ -163,6 +165,7 @@ export default function Layout() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/donordashboard" element={user ? <DonorDashboard /> : <Navigate to="/login" replace />} />
             <Route path="/admin-dashboard" element={user && user.role === 'Administrator' ? <AdminDashboard /> : <Navigate to="/login" replace />} />
+            <Route path="/donation-requests" element={user && user.role === 'Administrator' ? <DonationRequests /> : <Navigate to="/login" replace />} />
             <Route path="/donorslist" element={user && user.role === 'Administrator' ? <DonorsList /> : <Navigate to="/login" replace />} />
             <Route path="/batchstafflist" element={user && user.role === 'Administrator' ? <BatchStaffList /> : <Navigate to="/login" replace />} />
             <Route path="/batch-staff-dashboard" element={user && user.role === 'Batch staff' ? <BatchStaffDashboard /> : <Navigate to="/login" replace />} />

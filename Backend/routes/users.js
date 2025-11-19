@@ -99,6 +99,21 @@ router.post('/login', async (req, res) => {
 });
 
 
+// GET /api/users/me - Get current user details (for AuthContext)
+router.get('/me', auth, async (req, res) => {
+    try {
+        // req.user.id comes from the auth middleware
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: 'Server Error' });
+    }
+});
+
 // GET /api/users/dashboard - Efficient dashboard data for a user
 router.get('/dashboard', auth, async (req, res) => {
     try {
@@ -138,18 +153,5 @@ router.get('/dashboard', auth, async (req, res) => {
 });
 
 
-// GET /api/auth/me - Get current user details (for AuthContext)
-const authMiddleware = require('../middleware/auth');
-router.get('/auth/me', authMiddleware, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id).select('-password');
-        if (!user) {
-            return res.status(404).json({ msg: 'User not found' });
-        }
-        res.json(user);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
 module.exports = router;

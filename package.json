@@ -1,6 +1,13 @@
 {
-  "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "jsonwebtoken": "^9.0.2"
+  "name": "coswo-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && npm install --prefix Backend && npm install --prefix Frontend",
+    "dev": "concurrently \"npm start --prefix Backend\" \"npm start --prefix Frontend\"",
+    "migrate:donors": "node Backend/scripts/migrateDonors.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

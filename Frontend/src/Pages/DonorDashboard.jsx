@@ -94,7 +94,7 @@ const DonorDashboard = () => {
               <div className="flex items-center gap-3"><Phone className="w-5 h-5 text-gray-400" /><div><p className="text-sm text-gray-500">Phone</p><p className="font-medium">{donor.phone_number || 'N/A'}</p></div></div>
             </div>
             <div className="mt-6 pt-6 border-t">
-              <Badge className="bg-gradient-to-r from-blue-600 to-orange-600 text-white text-base px-4 py-2">Donor ID: {donor._id}</Badge>
+              <Badge className="bg-gradient-to-r from-blue-600 to-orange-600 text-white text-base px-4 py-2">Donor ID: {donor.donorId}</Badge>
             </div>
           </CardContent>
         </Card>
